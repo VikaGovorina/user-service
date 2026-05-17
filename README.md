@@ -73,6 +73,7 @@ npm run seed:admin
 ### Данные администратора
 
 email: admin@example.com
+
 password: admin123
 
 8. Запуск проекта
