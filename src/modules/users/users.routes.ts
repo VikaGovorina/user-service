@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { blockUser, getUser, getUsers } from "./users.controller";
 import { roleMiddleware } from "../../middleware/role.middleware";
+import { asyncHandler } from "../../utils/asyncHandler";
 
 const router = Router();
 
@@ -9,19 +10,19 @@ router.get(
     "/",
     authMiddleware,
     roleMiddleware(["ADMIN"]),
-    getUsers
+    asyncHandler(getUsers)
 );
 
 router.get(
     "/:id",
     authMiddleware,
-    getUser
+    asyncHandler(getUser)
 );
 
 router.patch(
     "/:id/block",
     authMiddleware,
-    blockUser
+    asyncHandler(blockUser)
 );
 
 export default router;
