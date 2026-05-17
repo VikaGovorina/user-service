@@ -1,52 +1,35 @@
 import { prisma } from "../../prisma/client";
+import { toUserResponseDto } from "../../utils/userAuthUtils";
 
 export const getAllUsers = async () => {
-    return prisma.user.findMany({
-        select: {
-            id: true,
-            fullName: true,
-            birthDate: true,
-            email: true,
-            role: true,
-            isActive: true,
-            createdAt: true,
-        }
-    });
+    const users = await prisma.user.findMany();
+
+    return users.map(toUserResponseDto);
 };
 
 export const getUserById = async (id: string) => {
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
         where: {
-            id,
+            id
         },
-        select: {
-            id: true,
-            fullName: true,
-            birthDate: true,
-            email: true,
-            role: true,
-            isActive: true,
-            createdAt: true,
-        }
     });
+
+    if (!user) {
+        return null;
+    }
+
+    return toUserResponseDto(user);
 };
 
 export const blockUserById = async (id: string) => {
-    return prisma.user.update({
+    const user = await prisma.user.update({
         where: {
             id,
         },
         data: {
             isActive: false,
         },
-        select: {
-            id: true,
-            fullName: true,
-            birthDate: true,
-            email: true,
-            role: true,
-            isActive: true,
-            createdAt: true,
-        }
     });
+
+    return toUserResponseDto(user);
 };

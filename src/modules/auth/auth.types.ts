@@ -1,3 +1,4 @@
+import { UserResponseDto } from "../users/users.types";
 
 export interface RegisterData {
     fullName: string;
@@ -14,4 +15,9 @@ export interface LoginData {
 export interface JwtPayload {
     id: string;
     role: "ADMIN" | "USER";
+}
+
+export interface AuthResponseDto {
+    user: UserResponseDto;
+    token: string;
 }

@@ -1,10 +1,11 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../../prisma/client";
 import { generateToken } from "../../utils/jwt";
-import { LoginData, RegisterData } from "./auth.types";
+import { AuthResponseDto, LoginData, RegisterData } from "./auth.types";
 import { HttpError } from "../../utils/http-error";
+import { toUserResponseDto } from "../../utils/userAuthUtils";
 
-export const registerUser = async (data: RegisterData) => {
+export const registerUser = async (data: RegisterData): Promise<AuthResponseDto> => {
     const existingUser = await prisma.user.findUnique({
         where: {
             email: data.email,
@@ -12,7 +13,6 @@ export const registerUser = async (data: RegisterData) => {
     });
 
     if (existingUser) {
-        // throw new Error("User already exists");
         throw new HttpError("User already exists", 409);
     }
 
@@ -32,15 +32,13 @@ export const registerUser = async (data: RegisterData) => {
         role: user.role,
     });
 
-    const { password, ...userWithoutPassword } = user;
-
     return {
-        user: userWithoutPassword,
+        user: toUserResponseDto(user),
         token,
     };
 };
 
-export const loginUser = async (data: LoginData) => {
+export const loginUser = async (data: LoginData): Promise<AuthResponseDto> => {
     const user = await prisma.user.findUnique({
         where: {
             email: data.email,
@@ -48,19 +46,16 @@ export const loginUser = async (data: LoginData) => {
     });
 
     if (!user) {
-        // throw new Error("User not found");
         throw new HttpError("Invalid credentials", 401);
     }
 
     if (!user.isActive) {
-        // throw new Error("User is blocked");
         throw new HttpError("User is blocked", 403);
     }
 
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
 
     if (!isPasswordValid) {
-        // throw new Error("Invalid password");
         throw new HttpError("Invalid password", 401);
     }
 
@@ -69,10 +64,8 @@ export const loginUser = async (data: LoginData) => {
         role: user.role,
     });
     
-    const { password: _, ...userWithoutPassword } = user;
-
     return {
-        user: userWithoutPassword,
+        user: toUserResponseDto(user),
         token,
     };
 };
